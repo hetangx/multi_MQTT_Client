@@ -4,23 +4,19 @@
 #include <paho-mqtt/MQTTAsync.h>
 #include "zzzjson.h"
 
-#define ADDRESS "tcp://localhost:1883"
-#define CLIENTID "Vcwave_3"
+#define ADDRESS "tcp://test.mosquitto.org:1883"
+#define CLIENTID "Power-Quality-Analyzer"
 #define USERNAME "yishu"
 #define PASSWORD "123456"
 #define QOS 1
 #define TIMEOUT 10000L
 
-#define PARSECONTENT "Vwfc"
-#define PUBTOPIC "plat/gateway/460110142949436/pkg/4/return"
-#define SUBTOPIC "plat/gateway/460110142949436/pkg/4/up"
-
 extern int disc_finished;
 extern int subscribed;
 extern int finished;
 
-void connlost(void* context, char* cause);
-int msgarrvd(void* context, char* topicName, int topicLen, MQTTClient_message* message);
+void connlost(void* context, char* cause); 
+int msgarrvd(void* context, char* topicName, int topicLen, MQTTAsync_message* message);
 void onConnect(void* context, MQTTAsync_successData* response);
 void onSubscribe(void* context, MQTTAsync_successData* response);
 void onSubscribeFailure(void* context, MQTTAsync_failureData* response);

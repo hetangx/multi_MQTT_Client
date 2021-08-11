@@ -5,9 +5,13 @@ int disc_finished = 0;
 int subscribed = 0;
 int finished = 0;
 
-
-int msgarrvd(void* context, char* topicName, int topicLen, MQTTClient_message* message)
+int msgarrvd(void* context, char* topicName, int topicLen, MQTTAsync_message* message)
 {
+    if (message->payloadlen < 0)
+    {
+        printf("Message empty, please contact the administrator.\nLast Message didn't send because of some bugs.\n");
+        return -1;
+    }
     // 1. ÉùÃ÷pubmsgÖ¸Õë, ÉêÇë¿Õ¼ä³ÐÔØpayload
     char* pubmsgpayload = (char*)malloc(JSONLENGTH);
     if (pubmsgpayload == NULL)
@@ -24,6 +28,7 @@ int msgarrvd(void* context, char* topicName, int topicLen, MQTTClient_message* m
     if (returnTopic == NULL)
     {
         printf("malloc returnTopic memory error, pls restart program...\n");
+        return -1;
     }
 
     CatPubtopic(&returnTopic, topicName);
@@ -36,12 +41,11 @@ int msgarrvd(void* context, char* topicName, int topicLen, MQTTClient_message* m
     printf("Message received: \n%s\n", (char*)message->payload);
     printf("Payload to publish: \n%s\n", pubmsgpayload);
 
-    //printf("Successful connection\n");
     opts.onSuccess = onSend;
     opts.onFailure = onSendFailure;
     opts.context = client;
     pubmsg.payload = pubmsgpayload;
-    pubmsg.payloadlen = strlen(pubmsgpayload);
+    pubmsg.payloadlen = (int)strlen(pubmsgpayload);
     pubmsg.qos = QOS;
     pubmsg.retained = 0;
 
@@ -54,8 +58,12 @@ int msgarrvd(void* context, char* topicName, int topicLen, MQTTClient_message* m
 
     //FREE MEMORY
     MQTTAsync_freeMessage(&message);
+    MQTTAsync_free(topicName);
+
     free(pubmsgpayload);
     free(returnTopic);
+
+    return 1;
 }
 
 void onConnect(void* context, MQTTAsync_successData* response)
@@ -161,7 +169,7 @@ void connlost(void* context, char* cause)
 
 void CatPubtopic(char** p, char* maintopic)
 {
-    int lenp = strlen(maintopic) + 5;
+    int lenp = (int)(strlen(maintopic) + 5);
     char* p1 = strstr(maintopic, "/up");
     if (p1)
     {

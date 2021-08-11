@@ -271,7 +271,7 @@ double Parse1Helper(Value* v, char* key)
     Value* temp = ObjGet(v, key);
     if (temp == 0)
     {
-        return;
+        return -1;
     }
     const double* t = GetDouble(temp);
     return *t;
@@ -330,7 +330,7 @@ void MessageSwitch(char* topicName, char* payload, char** cptr)
         break;
     default:
         printf("get fig error, fig=%c\n", fig);
-        return -1;
+        return;
         break;
     }
 
@@ -340,9 +340,9 @@ void MessageSwitch(char* topicName, char* payload, char** cptr)
 double unbalance(double out[])
 {
     double avr = (out[4] + out[12] + out[20]) / 3.0;
-    double max1 = abs(avr - out[4]);
-    double max2 = abs(avr - out[12]);
-    double max3 = abs(avr - out[20]);
+    double max1 = fabs(avr - out[4]);
+    double max2 = fabs(avr - out[12]);
+    double max3 = fabs(avr - out[20]);
 
     double max4 = max(max1, max2);
     double max5 = max(max4, max3);
@@ -361,7 +361,7 @@ void CalcUnbalance(char* payload, char** cptr)
 
     Allocator* A = NewAllocator();
     Value* v = NewValue(A);
-    CutoffBuffer1(payload);
+    // CutoffBuffer1(payload);
     bool ret = Parse(v, payload);
     if (ret != true)
     {
@@ -382,8 +382,8 @@ void CalcUnbalance(char* payload, char** cptr)
     }
 
     double ub = unbalance(out);
-    char* osid = parse1Helper_str(v, "substationid");
-    char* otid = parse1Helper_str(v, "transformerid");
+    const char* osid = parse1Helper_str(v, "substationid");
+    const char* otid = parse1Helper_str(v, "transformerid");
 
     char front[JSONLENGTH];
     makeJsonSt mjst;
@@ -411,12 +411,12 @@ void CalcWave(char* payload, int fig, char** cptr)
 
     Allocator* A = NewAllocator();
     Value* v = NewValue(A);
-    CutoffBuffer1(payload);
+    // CutoffBuffer1(payload);
     bool ret = Parse(v, payload);
     if (ret != true)
     {
         printf("Parse wave payload error\n");
-        return -1;
+        return;
     }
 
     char* parsecontent[6] = {

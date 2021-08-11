@@ -18,10 +18,10 @@ typedef struct COMPLEX{
 }complex;
 
 typedef struct ReturnJsonRef{
-    char* sid;
-    char* tid;
-    char* tm;
-    char* ref_id;
+    const char* sid;
+    const char* tid;
+    const char* tm;
+    const char* ref_id;
     int mode; /*mode: 1 -> ub, 2~7 -> wave, 8-> voiceprint*/
 }makeJsonSt;
 
