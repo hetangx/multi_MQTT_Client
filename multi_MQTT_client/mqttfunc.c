@@ -17,60 +17,10 @@ int msgarrvd(void* context, char* topicName, int topicLen, MQTTClient_message* m
     }
     MessageSwitch(topicName, message->payload, &pubmsgpayload);
 
-    // 2. 发送至return topic
-
-
-
-    /*  重新设计msg arrvd
-    *   1. 声明pubmsg指针, 申请空间承载payload
-*                 -> char* pubmsg = (char*)malloc(JSONLENGTH);
-            if(pubmsg)
-            {
-                do something...
-            }
-            else
-            {
-                printf("malloc pubmsg memory error, pls restart program...\n");
-            }
-      */
-     /*
-        2. 得到topicName中的fig, 不同fig对应不同逻辑
-            Do something:     
-            1.1 fig = 1
-            计算三项不平衡
-            CalcUnbalance(message->payload, &pubmsg);
-            1.2 fig = 2 ~ 7
-            CalcWaves(fig, message->payload, &pubmsg);
-                -> char waves[6] = {"cwfa", "cwfb", ... ,"vwfc"};
-                    parse关键字为waves[atoi(fig)]
-            1.3 fig = 8
-            待做
-            */
-
-/*        3. 发送至return topic
-           char* returnTopic = (char*)malloc(strlen(maintopic) + 5);
-           if (returnTopic)
-           {
-            do something...
-           }
-           else
-           {
-            printf("malloc returnTopic memory error, pls restart program...\n");
-           }
-
-           Do something:
-           PUB(returnTopic, pubmsg);
-            -> 复制粘贴
-        3. 释放内存
-            MQTTAsync_freeMessage(&message);
-            MQTTAsync_free(topicName);
-            free(pubmsg);
-            free(returnTopic);
-    */
 
     //PUBLISH
     
-    char* returnTopic = (char*)malloc(topicLen + 5);
+    char* returnTopic = (char*)malloc((size_t)topicLen + 5);
     if (returnTopic == NULL)
     {
         printf("malloc returnTopic memory error, pls restart program...\n");
@@ -104,11 +54,8 @@ int msgarrvd(void* context, char* topicName, int topicLen, MQTTClient_message* m
 
     //FREE MEMORY
     MQTTAsync_freeMessage(&message);
-    MQTTAsync_free(topicName);
     free(pubmsgpayload);
     free(returnTopic);
-
-    return 1;
 }
 
 void onConnect(void* context, MQTTAsync_successData* response)
