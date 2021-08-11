@@ -3,7 +3,6 @@
 #include <string.h>
 #include <Windows.h>
 #include <process.h>
-
 #include "mqttfunc.h"
 #include "dataproc.h"
 
@@ -68,10 +67,6 @@ int main()
     char* client2 = "c2";
 
     //_beginthreadex(NULL, 0, 0, topic1, 0, slim2);
-
-
-
-
 
     MQTTAsync client;
     MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;

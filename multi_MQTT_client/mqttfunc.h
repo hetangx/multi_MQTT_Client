@@ -30,4 +30,6 @@ void onDisconnect(void* context, MQTTAsync_successData* response);
 void onSend(void* context, MQTTAsync_successData* response);
 void onSendFailure(void* context, MQTTAsync_failureData* response);
 
+
+void CatPubtopic(char** p, char* maintopic);
 #endif // !MQTTFUNC_H

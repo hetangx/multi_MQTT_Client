@@ -4,14 +4,20 @@
 
 char getFigure(char* topicName, char* payload)
 {
-    char* fig = strstr(topicName, "/up");
-    char a = 0;
-    if (fig)
+    char p[10] = { '0','1','2','3','4','5','6','7','8','9' };
+    char* pfig = NULL;
+    for (int i = 0; i < 10; i++)
     {
-        fig--;
-        a = *fig;
-        // printf("a: %c\n", a);
+        if ((pfig = strrchr(topicName, p[i])) != NULL)
+        {
+            break;
+        }
     }
+
+    char a = 0;
+        a = *pfig;
+         printf("a: %c\n", a);
+
     return a;
 }
 

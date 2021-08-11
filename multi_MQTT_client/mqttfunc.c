@@ -8,6 +8,19 @@ int finished = 0;
 
 int msgarrvd(void* context, char* topicName, int topicLen, MQTTClient_message* message)
 {
+    // 1. 声明pubmsg指针, 申请空间承载payload
+    char* pubmsgpayload = (char*)malloc(JSONLENGTH);
+    if (pubmsgpayload == NULL)
+    {
+        printf("malloc pubmsg memory error, pls restart program...\n");
+        return -1;
+    }
+    MessageSwitch(topicName, message->payload, &pubmsgpayload);
+
+    // 2. 发送至return topic
+
+
+
     /*  重新设计msg arrvd
     *   1. 声明pubmsg指针, 申请空间承载payload
 *                 -> char* pubmsg = (char*)malloc(JSONLENGTH);
@@ -19,9 +32,9 @@ int msgarrvd(void* context, char* topicName, int topicLen, MQTTClient_message* m
             {
                 printf("malloc pubmsg memory error, pls restart program...\n");
             }
+      */
+     /*
         2. 得到topicName中的fig, 不同fig对应不同逻辑
-
-
             Do something:     
             1.1 fig = 1
             计算三项不平衡
@@ -32,7 +45,9 @@ int msgarrvd(void* context, char* topicName, int topicLen, MQTTClient_message* m
                     parse关键字为waves[atoi(fig)]
             1.3 fig = 8
             待做
-        3. 发送至return topic
+            */
+
+/*        3. 发送至return topic
            char* returnTopic = (char*)malloc(strlen(maintopic) + 5);
            if (returnTopic)
            {
@@ -52,74 +67,16 @@ int msgarrvd(void* context, char* topicName, int topicLen, MQTTClient_message* m
             free(pubmsg);
             free(returnTopic);
     */
-    printf("%s\t%d\n", topicName, topicLen);
-    Allocator* A = NewAllocator();
-    Value* v = NewValue(A);
-    CutoffBuffer1((char*)message->payload);
-    bool ret = Parse(v, (char*)message->payload);
-    if (ret != true)
-    {
-        printf("Parse Error\n");
-        return -1;
-    }
-
-    Value* waveArray = ObjGet(v, PARSECONTENT);
-    if (waveArray == 0)
-    {
-        printf("parse error\n");
-        return 0;
-    }
-
-    //FFT func
-    double PI = atan(1) * 4;
-    for (int i = 0; i < WAVELENGTH; i++)
-    {
-        double temp = ParseWaveHelper(waveArray, i);
-        x[i].real = temp;
-    }
-
-    for (int j = 0; j < 64; j++)
-    {
-        if (j % 5 == 0)
-        {
-            continue;
-        }
-        x[j].real = ((x[j + 1].real - x[j].real) / 256) * (56 * ((double)j + 1));
-        x[j].img = 0;
-    }
-
-    //初始化变换核
-
-    for (int i = 0; i < WAVELENGTH; i++)
-    {
-        W[i].real = cos(2 * PI / WAVELENGTH * i);   //用欧拉公式计算旋转因子
-        W[i].img = -1 * sin(2 * PI / WAVELENGTH * i);
-    }
-
-    fft();//调用快速傅里叶变换
-    result[32] = output();//调用输出傅里叶变换结果函数
-
-    char* osid = (char*)parse1Helper_str(v, "substationid");
-    char* otid = (char*)parse1Helper_str(v, "transformerid");
-    char* otm = (char*)parse1Helper_str(v, "time");
-    char* orid = (char*)parse1Helper_str(v, "ref_id");
-
-
-
-    char front[JSONWAVELENGTH];
-    makeJsonWaveFront(front, JSONWAVELENGTH, osid, otid, otm, orid);
-
-    char* cptr = (char*)malloc(sizeof(char*) * JSONWAVELENGTH);
-    int cptrlen = 0;
-    if (cptr)
-    {
-        memset(cptr, 0, JSONWAVELENGTH);
-        strcpy_s(cptr, JSONWAVELENGTH, front);
-        makeJsonWaveBack(result, WAVERESULT, &cptr);
-        cptrlen = (int)strlen(cptr);
-    }
 
     //PUBLISH
+    
+    char* returnTopic = (char*)malloc(topicLen + 5);
+    if (returnTopic == NULL)
+    {
+        printf("malloc returnTopic memory error, pls restart program...\n");
+    }
+
+    CatPubtopic(&returnTopic, topicName);
 
     MQTTAsync client = (MQTTAsync)context;
     MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
@@ -127,53 +84,66 @@ int msgarrvd(void* context, char* topicName, int topicLen, MQTTClient_message* m
 
 
     printf("Message received: \n%s\n", (char*)message->payload);
-    printf("Payload to publish: \n%s\n", cptr);
+    printf("Payload to publish: \n%s\n", pubmsgpayload);
 
     //printf("Successful connection\n");
     opts.onSuccess = onSend;
     opts.onFailure = onSendFailure;
     opts.context = client;
-    pubmsg.payload = cptr;
-    pubmsg.payloadlen = cptrlen;
+    pubmsg.payload = pubmsgpayload;
+    pubmsg.payloadlen = strlen(pubmsgpayload);
     pubmsg.qos = QOS;
     pubmsg.retained = 0;
 
     int rc;
-    if ((rc = MQTTAsync_sendMessage(client, PUBTOPIC, &pubmsg, &opts)) != MQTTASYNC_SUCCESS)
+    if ((rc = MQTTAsync_sendMessage(client, returnTopic, &pubmsg, &opts)) != MQTTASYNC_SUCCESS)
     {
         printf("Failed to start sendMessage, return code %d\n", rc);
         exit(EXIT_FAILURE);
     }
 
     //FREE MEMORY
-    ReleaseAllocator(A);
-    memset(result, 0, 33);
-    memset(x, 0, sizeof(complex) * WAVELENGTH);
-    memset(W, 0, sizeof(complex) * WAVELENGTH);
-    free(cptr);
+    MQTTAsync_freeMessage(&message);
+    MQTTAsync_free(topicName);
+    free(pubmsgpayload);
+    free(returnTopic);
 
     return 1;
 }
 
-
 void onConnect(void* context, MQTTAsync_successData* response)
 {
+    char* hostport = response->alt.connect.serverURI;
+    char* topics[8] = {
+        "plat/gateway/460110142949436/pkg/1/up",
+        "plat/gateway/460110142949436/pkg/2/up",
+        "plat/gateway/460110142949436/pkg/3/up",
+        "plat/gateway/460110142949436/pkg/4/up",
+        "plat/gateway/460110142949436/pkg/5/up",
+        "plat/gateway/460110142949436/pkg/6/up",
+        "plat/gateway/460110142949436/pkg/7/up",
+        "plat/gateway/460110142949436/pkg/8/up",
+    };
+    int qoss[8] = { 0,0,0,0,0,0,0,0};
+
     MQTTAsync client = (MQTTAsync)context;
     MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
     int rc;
 
-    printf("Successful connection\n");
-
-    printf("Subscribing to topic %s\nfor client %s using QoS%d\n\n"
-        "Press Q<Enter> to quit\n\n", SUBTOPIC, CLIENTID, QOS);
+    printf("Successful connection to %s\n", hostport);
+    printf("Subscribing to topic: %s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n", topics[0], topics[1], topics[2], topics[3], topics[4], topics[5], topics[6], topics[7]);
+    printf("For client %s using QoS%d\n\n"
+        "Press Q or q<Enter> to quit\n\n", CLIENTID, QOS);
     opts.onSuccess = onSubscribe;
     opts.onFailure = onSubscribeFailure;
     opts.context = client;
-    if ((rc = MQTTAsync_subscribe(client, SUBTOPIC, QOS, &opts)) != MQTTASYNC_SUCCESS)
+
+    // multi topics test 
+    if ((rc = MQTTAsync_subscribeMany(client, 8, topics, qoss, &opts) != MQTTASYNC_SUCCESS))
     {
         printf("Failed to start subscribe, return code %d\n", rc);
         finished = 1;
-    }
+    }    
 }
 
 void onConnectFailure(void* context, MQTTAsync_failureData* response)
@@ -240,4 +210,16 @@ void connlost(void* context, char* cause)
         printf("Failed to start connect, return code %d\n", rc);
         finished = 1;
     }
+}
+
+void CatPubtopic(char** p, char* maintopic)
+{
+    int lenp = strlen(maintopic) + 5;
+    char* p1 = strstr(maintopic, "/up");
+    if (p1)
+    {
+        strncpy_s(*p, lenp, maintopic, strlen(maintopic) - strlen(p1));
+        strcat_s(*p, lenp, "/retrun");
+    }
+
 }
