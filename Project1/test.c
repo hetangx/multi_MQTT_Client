@@ -2,50 +2,19 @@
 #include <stdlib.h>
 #include <string.h>
 
-char getFigure(char* topicName, char* payload)
-{
-    char p[10] = { '0','1','2','3','4','5','6','7','8','9' };
-    char* pfig = NULL;
-    for (int i = 0; i < 10; i++)
-    {
-        if ((pfig = strrchr(topicName, p[i])) != NULL)
-        {
-            break;
-        }
-    }
-
-    char a = 0;
-        a = *pfig;
-         printf("a: %c\n", a);
-
-    return a;
-}
-
-void catPubtopic(char** p, char* maintopic)
-{   
-    int lenp = strlen(maintopic) + 5;
-    char* p1 = strstr(maintopic, "/up");
-    if (p1)
-    {
-        strncpy_s(*p, lenp , maintopic, strlen(maintopic) - strlen(p1));
-        strcat_s(*p, lenp, "/retrun");
-    }
-
-}
-
 int main()
 {
-    char* test = "plat/gateway/460110142949436/pkg/4/up";
-    char* payload = "asdfqwer";
-    char fig = getFigure(test, payload);
-    printf("%c\n", fig);
-
-    char* pubtopic = (char*)malloc(strlen(test) + 5);
-    if (pubtopic)
+    char** k = NULL;
+    int fig = 2;
+    if (fig == 2)
     {
-        catPubtopic(&pubtopic, test);
-        printf("pub topic: %s\n", pubtopic);
+        k = {
+    "HphV0_phsA", "HphV1_phsA", "HphV2_phsA","HphV3_phsA","HphV4_phsA","HphV5_phsA","HphV6_phsA","HphV7_phsA",
+    "HphV8_phsA","HphV9_phsA","HphV10_phsA","HphV11_phsA","HphV12_phsA","HphV13_phsA","HphV14_phsA","HphV15_phsA",
+    "HphV16_phsA","HphV17_phsA","HphV18_phsA","HphV19_phsA","HphV20_phsA","HphV21_phsA","HphV22_phsA","HphV23_phsA",
+    "HphV24_phsA","HphV25_phsA","HphV26_phsA","HphV27_phsA","HphV28_phsA","HphV29_phsA","HphV30_phsA","HphV31_phsA",
+    "THDUa"
+        };
     }
-    free (pubtopic);
-    return 0;
+    printf("%s\n", k[0]);
 }

@@ -1,9 +1,36 @@
 #include "mqttfunc.h"
 #include "dataproc.h"
 
+#define PAYLOAD "Hello World!"
+
 int disc_finished = 0;
 int subscribed = 0;
 int finished = 0;
+
+int pub(void* context, char* payload, char* topic)
+{
+    MQTTAsync client = (MQTTAsync)context;
+    MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
+    MQTTAsync_message pubmsg = MQTTAsync_message_initializer;
+    int rc;
+
+    // some bugs happened, i can't fix it, so use an alternative therapy;
+    //char* alternative = (char*)malloc()
+    opts.onSuccess = onSend;
+    opts.onFailure = onSendFailure;
+    opts.context = client;
+    pubmsg.payload = payload;
+    pubmsg.payloadlen = (int)strlen(payload);
+    pubmsg.qos = QOS;
+    pubmsg.retained = 0;
+
+    printf("Publish Topic: %s\nPayload len: %d, Payload:\n%s\n", topic, pubmsg.payloadlen, (char*)pubmsg.payload);
+    if ((rc = MQTTAsync_sendMessage(client, topic, &pubmsg, &opts)) != MQTTASYNC_SUCCESS)
+    {
+        printf("Failed to start sendMessage, return code %d\n", rc);
+    }
+    return rc;
+}
 
 int msgarrvd(void* context, char* topicName, int topicLen, MQTTAsync_message* message)
 {
@@ -12,13 +39,14 @@ int msgarrvd(void* context, char* topicName, int topicLen, MQTTAsync_message* me
         printf("Message empty, please contact the administrator.\nLast Message didn't send because of some bugs.\n");
         return -1;
     }
-    // 1. ÉùÃ÷pubmsgÖ¸Õë, ÉêÇë¿Õ¼ä³ÐÔØpayload
+    // ÉùÃ÷pubmsgÖ¸Õë, ÉêÇë¿Õ¼ä³ÐÔØpayload
     char* pubmsgpayload = (char*)malloc(JSONLENGTH);
     if (pubmsgpayload == NULL)
     {
         printf("malloc pubmsg memory error, pls restart program...\n");
         return -1;
     }
+    memset(pubmsgpayload, 0, JSONLENGTH);
     MessageSwitch(topicName, message->payload, &pubmsgpayload);
 
 
@@ -30,38 +58,22 @@ int msgarrvd(void* context, char* topicName, int topicLen, MQTTAsync_message* me
         printf("malloc returnTopic memory error, pls restart program...\n");
         return -1;
     }
+    memset(returnTopic, 0, (size_t)topicLen + 5);
 
     CatPubtopic(&returnTopic, topicName);
+    printf("Message arrived\n");
+    printf("     topic: %s\n", topicName);
+    printf("   message: %.*s\n", message->payloadlen, (char*)message->payload);
 
     MQTTAsync client = (MQTTAsync)context;
-    MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
-    MQTTAsync_message pubmsg = MQTTAsync_message_initializer;
-
-
-    printf("Message received: \n%s\n", (char*)message->payload);
-    printf("Payload to publish: \n%s\n", pubmsgpayload);
-
-    opts.onSuccess = onSend;
-    opts.onFailure = onSendFailure;
-    opts.context = client;
-    pubmsg.payload = pubmsgpayload;
-    pubmsg.payloadlen = (int)strlen(pubmsgpayload);
-    pubmsg.qos = QOS;
-    pubmsg.retained = 0;
-
-    int rc;
-    if ((rc = MQTTAsync_sendMessage(client, returnTopic, &pubmsg, &opts)) != MQTTASYNC_SUCCESS)
-    {
-        printf("Failed to start sendMessage, return code %d\n", rc);
-        exit(EXIT_FAILURE);
-    }
-
-    //FREE MEMORY
-    MQTTAsync_freeMessage(&message);
-    MQTTAsync_free(topicName);
+    pub(client, pubmsgpayload, returnTopic);
 
     free(pubmsgpayload);
     free(returnTopic);
+
+    //FREE  MESSAGE MEMORY
+    MQTTAsync_freeMessage(&message);
+    MQTTAsync_free(topicName);
 
     return 1;
 }
@@ -79,7 +91,7 @@ void onConnect(void* context, MQTTAsync_successData* response)
         "plat/gateway/460110142949436/pkg/7/up",
         "plat/gateway/460110142949436/pkg/8/up",
     };
-    int qoss[8] = { 0,0,0,0,0,0,0,0};
+    int qoss[8] = {1,1,1,1,1,1,1,1};
 
     MQTTAsync client = (MQTTAsync)context;
     MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
@@ -92,8 +104,7 @@ void onConnect(void* context, MQTTAsync_successData* response)
     opts.onSuccess = onSubscribe;
     opts.onFailure = onSubscribeFailure;
     opts.context = client;
-
-    // multi topics test 
+ 
     if ((rc = MQTTAsync_subscribeMany(client, 8, topics, qoss, &opts) != MQTTASYNC_SUCCESS))
     {
         printf("Failed to start subscribe, return code %d\n", rc);
@@ -176,5 +187,4 @@ void CatPubtopic(char** p, char* maintopic)
         strncpy_s(*p, lenp, maintopic, strlen(maintopic) - strlen(p1));
         strcat_s(*p, lenp, "/retrun");
     }
-
 }

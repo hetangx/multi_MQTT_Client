@@ -27,7 +27,7 @@ typedef struct ReturnJsonRef{
 
 const char* parse1Helper_str(Value* v, char* key);
 void makeJsonFront(char temp[], int cnum, makeJsonSt* mjst);
-void makeJsonWaveBack(double newWave[], int wavenum, char** cptr);
+void makeJsonWaveBack(int fig, double newWave[], int wavenum, char** cptr);
 void makeJsonUb(double newImbNgA, char** cptr);
 void setHelper(Value* v, char* key, double item);
 

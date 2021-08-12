@@ -4,7 +4,7 @@
 #include <paho-mqtt/MQTTAsync.h>
 #include "zzzjson.h"
 
-#define ADDRESS "tcp://test.mosquitto.org:1883"
+#define ADDRESS "tcp://localhost:1883"
 #define CLIENTID "Power-Quality-Analyzer"
 #define USERNAME "yishu"
 #define PASSWORD "123456"
@@ -17,6 +17,7 @@ extern int finished;
 
 void connlost(void* context, char* cause); 
 int msgarrvd(void* context, char* topicName, int topicLen, MQTTAsync_message* message);
+int pub(void* context, char* payload, char* topic);
 void onConnect(void* context, MQTTAsync_successData* response);
 void onSubscribe(void* context, MQTTAsync_successData* response);
 void onSubscribeFailure(void* context, MQTTAsync_failureData* response);

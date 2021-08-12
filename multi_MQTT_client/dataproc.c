@@ -228,25 +228,98 @@ void makeJsonFront(char temp[], int cnum, makeJsonSt* mjst)
     }
 }
 
-void makeJsonWaveBack(double newWave[], int wavenum, char** cptr)
+void makeJsonWaveBack(int fig, double newWave[], int wavenum, char** cptr)
 {
     Allocator* A = NewAllocator();
     Value* v = NewValue(A);
     bool ret = Parse(v, *cptr);
     if (ret == true)
     {
-        char* keys[] = {
-            "HphV0_phsC", "HphV1_phsC", "HphV2_phsC","HphV3_phsC","HphV4_phsC","HphV5_phsC","HphV6_phsC","HphV7_phsC",
-            "HphV8_phsC","HphV9_phsC","HphV10_phsC","HphV11_phsC","HphV12_phsC","HphV13_phsC","HphV14_phsC","HphV15_phsC",
-            "HphV16_phsC","HphV17_phsC","HphV18_phsC","HphV19_phsC","HphV20_phsC","HphV21_phsC","HphV22_phsC","HphV23_phsC",
-            "HphV24_phsC","HphV25_phsC","HphV26_phsC","HphV27_phsC","HphV28_phsC","HphV29_phsC","HphV30_phsC","HphV31_phsC",
-            "THDUc"
-        };
-
-        for (int i = 0; i < wavenum; i++)
+        if (fig == 2)
         {
-            setHelper(v, keys[i], newWave[i]);
+            char* keys[] = {
+                "HphV0_phsA", "HphV1_phsA", "HphV2_phsA","HphV3_phsA","HphV4_phsA","HphV5_phsA","HphV6_phsA","HphV7_phsA",
+                "HphV8_phsA","HphV9_phsA","HphV10_phsA","HphV11_phsA","HphV12_phsA","HphV13_phsA","HphV14_phsA","HphV15_phsA",
+                "HphV16_phsA","HphV17_phsA","HphV18_phsA","HphV19_phsA","HphV20_phsA","HphV21_phsA","HphV22_phsA","HphV23_phsA",
+                "HphV24_phsA","HphV25_phsA","HphV26_phsA","HphV27_phsA","HphV28_phsA","HphV29_phsA","HphV30_phsA","HphV31_phsA",
+                "THDUa"
+            };
+            for (int i = 0; i < wavenum; i++)
+            {
+                setHelper(v, keys[i], newWave[i]);
+            }
         }
+        if (fig == 3)
+        {
+            char* keys[] = {
+                "HphV0_phsB", "HphV1_phsB", "HphV2_phsB","HphV3_phsB","HphV4_phsB","HphV5_phsB","HphV6_phsB","HphV7_phsB",
+                "HphV8_phsB","HphV9_phsB","HphV10_phsB","HphV11_phsB","HphV12_phsB","HphV13_phsB","HphV14_phsB","HphV15_phsB",
+                "HphV16_phsB","HphV17_phsB","HphV18_phsB","HphV19_phsB","HphV20_phsB","HphV21_phsB","HphV22_phsB","HphV23_phsB",
+                "HphV24_phsB","HphV25_phsB","HphV26_phsB","HphV27_phsB","HphV28_phsB","HphV29_phsB","HphV30_phsB","HphV31_phsB",
+                "THDUb"
+            };
+            for (int i = 0; i < wavenum; i++)
+            {
+                setHelper(v, keys[i], newWave[i]);
+            }
+        }
+		if (fig == 4)
+		{
+			char* keys[] = {
+	            "HphV0_phsC", "HphV1_phsC", "HphV2_phsC","HphV3_phsC","HphV4_phsC","HphV5_phsC","HphV6_phsC","HphV7_phsC",
+	            "HphV8_phsC","HphV9_phsC","HphV10_phsC","HphV11_phsC","HphV12_phsC","HphV13_phsC","HphV14_phsC","HphV15_phsC",
+	            "HphV16_phsC","HphV17_phsC","HphV18_phsC","HphV19_phsC","HphV20_phsC","HphV21_phsC","HphV22_phsC","HphV23_phsC",
+	            "HphV24_phsC","HphV25_phsC","HphV26_phsC","HphV27_phsC","HphV28_phsC","HphV29_phsC","HphV30_phsC","HphV31_phsC",
+	            "THDUc"
+			};
+            for (int i = 0; i < wavenum; i++)
+            {
+                setHelper(v, keys[i], newWave[i]);
+            }
+		}
+        if (fig == 5)
+        {
+            char* keys[] = {
+                "HA0_phsA", "HA1_phsA", "HA2_phsA","HA3_phsA","HA4_phsA","HA5_phsA","HA6_phsA","HA7_phsA",
+                "HA8_phsA","HA9_phsA","HA10_phsA","HA11_phsA","HA12_phsA","HA13_phsA","HA14_phsA","HA15_phsA",
+                "HA16_phsA","HA17_phsA","HA18_phsA","HA19_phsA","HA20_phsA","HA21_phsA","HA22_phsA","HA23_phsA",
+                "HA24_phsA","HA25_phsA","HA26_phsA","HA27_phsA","HA28_phsA","HA29_phsA","HA30_phsA","HA31_phsA",
+                "THDIa"
+            };
+            for (int i = 0; i < wavenum; i++)
+            {
+                setHelper(v, keys[i], newWave[i]);
+            }
+        }
+        if (fig == 6)
+        {
+            char* keys[] = {
+                "HA0_phsB", "HA1_phsB", "HA2_phsB","HA3_phsB","HA4_phsB","HA5_phsB","HA6_phsB","HA7_phsB",
+                "HA8_phsB","HA9_phsB","HA10_phsB","HA11_phsB","HA12_phsB","HA13_phsB","HA14_phsB","HA15_phsB",
+                "HA16_phsB","HA17_phsB","HA18_phsB","HA19_phsB","HA20_phsB","HA21_phsB","HA22_phsB","HA23_phsB",
+                "HA24_phsB","HA25_phsB","HA26_phsB","HA27_phsB","HA28_phsB","HA29_phsB","HA30_phsB","HA31_phsB",
+                "THDIb"
+            };
+            for (int i = 0; i < wavenum; i++)
+            {
+                setHelper(v, keys[i], newWave[i]);
+            }
+        }
+        if (fig == 7)
+        {
+            char* keys[] = {
+                "HA0_phsC", "HA1_phsC", "HA2_phsC","HA3_phsC","HA4_phsC","HA5_phsC","HA6_phsC","HA7_phsC",
+                "HA8_phsC","HA9_phsC","HA10_phsC","HA11_phsC","HA12_phsC","HA13_phsC","HA14_phsC","HA15_phsC",
+                "HA16_phsC","HA17_phsC","HA18_phsC","HA19_phsC","HA20_phsC","HA21_phsC","HA22_phsC","HA23_phsC",
+                "HA24_phsC","HA25_phsC","HA26_phsC","HA27_phsC","HA28_phsC","HA29_phsC","HA30_phsC","HA31_phsC",
+                "THDIc"
+            };
+            for (int i = 0; i < wavenum; i++)
+            {
+                setHelper(v, keys[i], newWave[i]);
+            }
+        }
+
     }
     const char* str = Stringify(v);
     strcpy_s(*cptr, JSONLENGTH, str);
@@ -481,7 +554,7 @@ void CalcWave(char* payload, int fig, char** cptr)
     memset(*cptr, 0, JSONLENGTH);
     strcpy_s(*cptr, JSONLENGTH, front);
 
-    makeJsonWaveBack(result, WAVERESULT, cptr);
+    makeJsonWaveBack(fig, result, WAVERESULT, cptr);
 
     // free memory
     ReleaseAllocator(A);
